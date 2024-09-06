@@ -3,12 +3,42 @@ import Modal from 'react-bootstrap/Modal';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
-
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+interface IUser {
+    name: string,
+    email: string
+}
 const UserCreateModal = (props: any) => {
     const { isOpenCreateModal, setIsOpenCreateModal } = props;
-
     const [email, setEmail] = useState<string>("");
     const [name, setName] = useState<string>("");
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: async (payload: IUser) => {
+            const response = await fetch(`http://localhost:8000/users`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload), // Send the payload directly
+            });
+            // Check if the response is not OK and throw an error
+            if (!response.ok) {
+                throw new Error('Failed to create user');
+            }
+            return response.json(); // Parse response JSON
+        },
+        onSuccess: () => {
+            // Invalidate and refetch
+            queryClient.invalidateQueries({ queryKey: ['repoData'], })
+            setIsOpenCreateModal(false)
+            setEmail("")
+            setName("")
+        },
+
+    });
 
     const handleSubmit = () => {
         if (!email) {
@@ -21,6 +51,7 @@ const UserCreateModal = (props: any) => {
         }
         //call api => call redux
         console.log({ email, name }) //payload
+        mutation.mutate({ email, name })   // Hàm mutate được gọi để thực hiện mutation
     }
 
     return (
