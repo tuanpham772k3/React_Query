@@ -1,5 +1,5 @@
 import Table from "react-bootstrap/Table";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import BlogCreateModal from "./modal/blog.create.modal";
 import BlogEditModal from "./modal/blog.edit.modal";
